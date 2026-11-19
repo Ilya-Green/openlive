@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from "vitest";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { LANGUAGE_CODES } from "@openlive/shared";
 import { HEAD } from "@openlive/shared/speech/addressee-head";
 import { dirname, join } from "node:path";
 
@@ -57,7 +58,7 @@ describe("native engine catalog", () => {
     expect(rest).toEqual([]);
     expect(m.onOrt(e!)).toBe(true);
     expect(e!.files).toEqual(["onnx/model_quantized.onnx", "tokenizer.json", "tokenizer_config.json"]);
-    expect(e!.languages).toEqual(["en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko"]);
+    expect(e!.languages).toEqual([...LANGUAGE_CODES]);
     expect(["Apache-2.0", "MIT"]).toContain(e!.license);
     expect(e!.id).toBe(HEAD.model); // the head was fitted on this model's embeddings
   });
@@ -101,7 +102,7 @@ describe("native engine catalog", () => {
   });
 
   it("covers every curated language with a streaming ASR and a TTS variant", () => {
-    for (const lang of ["en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko"]) {
+    for (const lang of LANGUAGE_CODES) {
       expect(m.NATIVE_ENGINES.some((e) => e.streaming && e.languages.includes(lang))).toBe(true);
       if (lang !== "ko" && lang !== "ja") expect(m.NATIVE_ENGINES.some((e) => e.kind === "tts" && e.languages.includes(lang))).toBe(true);
     }

@@ -123,6 +123,7 @@ const BACKCHANNELS: Record<LanguageCode, string[]> = {
   zh: ["嗯", "恩", "对", "对的", "是", "是的", "好", "好的", "好吧", "行", "哦", "噢", "啊", "呃", "嗯哼", "没错", "明白", "明白了", "知道了"],
   ja: ["はい", "うん", "ええ", "ああ", "あ", "え", "えー", "ん", "そう", "そうそう", "そうですね", "そっか", "そうか", "ですね", "ね", "なるほど", "へえ", "ほう", "ふーん", "確かに", "たしかに", "了解", "オッケー"],
   ko: ["네", "예", "응", "어", "음", "아", "오", "그래", "그래요", "그렇죠", "그렇구나", "맞아", "맞아요", "맞습니다", "알겠어", "알겠어요", "좋아", "좋아요", "오케이", "흠", "아하"],
+  ru: ["да", "ага", "угу", "ну", "хорошо", "ладно", "понятно", "ясно", "точно", "верно", "ок", "окей", "так", "конечно", "именно"],
 };
 // Lowercase, bracketed sound notes and punctuation out, then every run of one
 // letter down to one, so "Mmmm-hmm!" and "mm hmm" both read "m hm".
@@ -135,7 +136,7 @@ const FOLDED = Object.fromEntries(Object.entries(BACKCHANNELS).map(([l, w]) => [
 // "hmph". Real words that Whisper makes of an "ahem" ("A ham", "hand") are left:
 // they voice as long as "stop" or "no" (480 ms against 416-512 ms, Silero v6),
 // so nothing tells them apart from a real one-word interruption.
-const SOUND = String.raw`[ae]?([hj][aeiouéè])\1+h?|(?:[ae]h){2,}|[hj]ah?|heh|lol|lmao|(?:rs){2,}|(?:h?c?kh?)+|[au]r?gh|[aeä]h[aeä]m|[aeä] h[eä]m|h[eä]m|[aeä]hm|ejem|hmp[hf]|h?m(?:h?m)*|pft?|tsk|[pw]hew|(?:ह[ािीेो]){2,}|[哈呵嘿嘻咳]|[あえ]?[はハへヘふフ]|(?:ゴホ)+|[하허히흐호크킥ㅋㅎ]|에헴|어흠|크흠`;
+const SOUND = String.raw`[ae]?([hj][aeiouéè])\1+h?|(?:[ae]h){2,}|[hj]ah?|heh|lol|lmao|(?:rs){2,}|(?:h?c?kh?)+|[au]r?gh|[aeä]h[aeä]m|[aeä] h[eä]m|h[eä]m|[aeä]hm|ejem|hmp[hf]|h?m(?:h?m)*|pft?|tsk|[pw]hew|(?:х[аеиоуё]){2,}|(?:ह[ािीेो]){2,}|[哈呵嘿嘻咳]|[あえ]?[はハへヘふフ]|(?:ゴホ)+|[하허히흐호크킥ㅋㅎ]|에헴|어흠|크흠`;
 const SOUND_WORD = new RegExp(`(?:${SOUND})(?= |$)`, "uy"), SOUND_ANY = new RegExp(SOUND, "uy");
 /** Nothing but backchannels, fillers, laughs and throat sounds, or no words at
  *  all. Chinese and Japanese write no spaces, so their entries may meet
@@ -161,6 +162,7 @@ export function isBackchannel(text: string, lang: LanguageCode): boolean {
 export const LISTENING: Record<LanguageCode, string[]> = {
   en: ["Mm-hmm.", "Yeah."], es: ["Ajá.", "Sí."], fr: ["Oui.", "D'accord."], de: ["Ja.", "Genau."], it: ["Sì.", "Certo."],
   pt: ["Uhum.", "Sim."], hi: ["हाँ।", "अच्छा।"], zh: ["嗯。", "对。"], ja: ["うん。", "なるほど。"], ko: ["네.", "음."],
+  ru: ["Угу.", "Да."],
 };
 
 const ASKS = /^(?:what|why|how|when|where|who|whose|which|can|could|would|will|should|shall|do|does|did|is|are|am|was|were|have|has)\b/i;

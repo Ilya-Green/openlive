@@ -205,13 +205,14 @@ test("every curated language has a recommended STT and TTS engine that speaks it
   assert.equal(defaultVariant(familyInfo("tts", "piper")!, "it", true), "piper-it_IT-paola-medium-int8");
   assert.equal(defaultVariant(familyInfo("tts", "piper")!, "en"), "piper-en_US-libritts_r-medium-int8"); // lessac is restricted
   assert.equal(defaultVariant(familyInfo("tts", "piper")!, "hi"), "piper-hi_IN-rohan-medium-int8"); // no open voice: the pick waits for the user's OK
+  assert.equal(defaultVariant(familyInfo("tts", "piper")!, "ru"), "piper-ru_RU-denis-medium-int8");
   assert.equal(defaultVariant(familyInfo("tts", "piper")!, "ja"), "piper-en_US-lessac-medium-int8"); // nothing speaks it: the family default
 });
 
 test("pickCompatible: from the browser defaults, every curated language", () => {
   const want: Record<string, string> = {
     en: "kokoro", es: "supertonic", fr: "supertonic", de: "supertonic", it: "supertonic", pt: "supertonic", hi: "supertonic",
-    zh: "kokoro-multi-v1_0", ja: "supertonic", ko: "supertonic",
+    zh: "kokoro-multi-v1_0", ja: "supertonic", ko: "supertonic", ru: "supertonic",
   };
   for (const lang of LANGUAGE_CODES) {
     const { cfg, changes, unsupported } = pickCompatible(DEFAULT_PIPELINE_CONFIG, lang);
@@ -232,6 +233,7 @@ test("pickCompatible: from native engines, every curated language, with and with
     de: ["parakeet-0.6b-v3-int8", "piper-de_DE-thorsten-medium-int8"], it: ["parakeet-0.6b-v3-int8", "kokoro-multi-v1_0"],
     pt: ["parakeet-0.6b-v3-int8", "kokoro-multi-v1_0"], hi: ["nemotron-3.5-160ms-int8", "kokoro-multi-v1_0"],
     zh: ["nemotron-3.5-160ms-int8", "kokoro-multi-v1_0"], ja: ["nemotron-3.5-160ms-int8", "supertonic"], ko: ["nemotron-3.5-160ms-int8", "supertonic"],
+    ru: ["parakeet-0.6b-v3-int8", "piper-ru_RU-denis-medium-int8"],
   };
   for (const lang of LANGUAGE_CODES) {
     const { cfg } = pickCompatible(native, lang);
@@ -259,9 +261,9 @@ test("pickCompatible: from native engines, every curated language, with and with
 
 test("restricted: the audited catalog marks the non-open models and nothing a default leans on", () => {
   for (const id of ["pocket-int8", "clone", "piper-en_US-lessac-medium-int8", "piper-en_US-amy-medium-int8", "piper-es_AR-daniela-high-int8",
-    "piper-fr_FR-tom-medium-int8", "piper-it_IT-paola-medium-int8", "piper-hi_IN-rohan-medium-int8", "piper-zh_CN-xiao_ya-medium-int8", "piper-zh_CN-huayan-medium"]) assert.ok(isRestricted(id), id);
+    "piper-fr_FR-tom-medium-int8", "piper-it_IT-paola-medium-int8", "piper-hi_IN-rohan-medium-int8", "piper-zh_CN-xiao_ya-medium-int8", "piper-zh_CN-huayan-medium", "piper-ru_RU-irina-medium-int8"]) assert.ok(isRestricted(id), id);
   for (const id of ["supertonic", "kokoro", "whisper", "nemotron-en-160ms-int8", "nemotron-3.5-160ms-int8", "piper-de_DE-ramona-low-int8", "piper-de_DE-thorsten-medium-int8",
-    "piper-de_DE-kerstin-low-int8", "piper-en_US-libritts_r-medium-int8", "piper-fr_FR-siwis-low-int8", "piper-zh_CN-chaowen-medium-int8", "kitten-nano-int8", "matcha-en-ljspeech"]) assert.equal(isRestricted(id), false, id);
+    "piper-de_DE-kerstin-low-int8", "piper-en_US-libritts_r-medium-int8", "piper-fr_FR-siwis-low-int8", "piper-zh_CN-chaowen-medium-int8", "piper-ru_RU-denis-medium-int8", "kitten-nano-int8", "matcha-en-ljspeech"]) assert.equal(isRestricted(id), false, id);
   for (const f of [...STT_FAMILIES, ...TTS_FAMILIES]) if (f.variants.some((v) => v.restricted)) assert.ok(f.restriction && f.licenseUrl, f.id);
   assert.equal(isRestricted(DEFAULT_PIPELINE_CONFIG.stt.variant) || isRestricted(DEFAULT_PIPELINE_CONFIG.tts.variant), false);
   for (const lang of LANGUAGE_CODES) {

@@ -8,11 +8,12 @@ describe("language names", () => {
     expect(languageLabel("es")).toBe("Español (Spanish)");
     expect(languageLabel("ja")).toBe("日本語 (Japanese)");
     expect(languageLabel("zh")).toBe("中文 (Chinese, Mandarin)");
+    expect(languageLabel("ru")).toBe("Русский (Russian)");
   });
   test("a greyed engine names the curated languages it speaks, in the picker's order", () => {
     expect(languagesNote(["en"])).toBe("English only");
     expect(languagesNote(["en", "es", "de", "fr"])).toBe("English, Spanish, French, German");
-    expect(languagesNote(["nl", "en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko", "ru"])).toBe("All 10 languages");
+    expect(languagesNote(["nl", "en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko", "ru"])).toBe("All 11 languages");
   });
 });
 
@@ -34,9 +35,9 @@ test("restrictive and unknown licenses are flagged, the rest pass through", () =
 
 describe("Model menu groups", () => {
   const piper = TTS_FAMILIES.find((f) => f.id === "piper")!.variants;
-  test("Piper's 32 voices group by language, the session's first, none lost", () => {
+  test("Piper's 35 voices group by language, the session's first, none lost", () => {
     const groups = variantGroups(piper, "de");
-    expect(groups.map((g) => g.lang)).toEqual(["de", "en", "es", "fr", "it", "pt", "hi", "zh"]);
+    expect(groups.map((g) => g.lang)).toEqual(["de", "en", "es", "fr", "it", "pt", "hi", "zh", "ru"]);
     expect(groups[0]!.variants.every((v) => v.id.startsWith("piper-de_DE"))).toBe(true);
     expect(groups.flatMap((g) => g.variants)).toHaveLength(piper.length);
   });

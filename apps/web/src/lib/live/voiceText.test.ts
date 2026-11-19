@@ -401,12 +401,13 @@ test("isBackchannel: acknowledgements, fillers and no words at all, in every lan
     ["es", "Sí, sí, vale."], ["es", "Ajá, claro"], ["fr", "Ouais, d'accord."], ["fr", "Oui oui, c'est ça"], ["de", "Ja ja, genau."], ["de", "Alles klar, mhm"],
     ["it", "Sì, sì, va bene."], ["pt", "Uhum, tá bom."], ["hi", "हाँ हाँ, ठीक है।"], ["hi", "accha, theek hai"],
     ["zh", "嗯嗯，对对对。"], ["zh", "好的好的"], ["ja", "うんうん、なるほど。"], ["ja", "はい、そうですね"], ["ko", "네 네, 맞아요."], ["ko", "아 그렇구나"],
+    ["ru", "Да, да, хорошо."], ["ru", "Угу, понятно"],
   ];
   for (const [lang, t] of yes) assert.equal(isBackchannel(t, lang as never), true, `${lang}: ${t}`);
   const no: [string, string][] = [
     ["en", "mm-hmm wait stop"], ["en", "no"], ["en", "yeah but the other one"], ["en", "okay stop"], ["en", "right now"], ["en", "I see it"],
     ["es", "sí, pero espera"], ["fr", "non"], ["de", "ja, aber warte"], ["it", "no, aspetta"], ["pt", "não"], ["hi", "रुको"],
-    ["zh", "对不对"], ["zh", "等一下"], ["ja", "ちょっと待って"], ["ja", "そうじゃない"], ["ko", "잠깐만요"],
+    ["zh", "对不对"], ["zh", "等一下"], ["ja", "ちょっと待って"], ["ja", "そうじゃない"], ["ko", "잠깐만요"], ["ru", "подожди"],
   ];
   for (const [lang, t] of no) assert.equal(isBackchannel(t, lang as never), false, `${lang}: ${t}`);
 });
@@ -416,12 +417,12 @@ test("isBackchannel: laughs of any length and throat sounds are no words, real w
     ["en", "Hahaha"], ["en", "ha"], ["en", "Ha ha ha!"], ["en", "Hahahahahaha."], ["en", "hehe"], ["en", "heh"], ["en", "hah, okay"], ["en", "lol"], ["en", "Ugh."], ["en", "Uggh"], ["en", "argh"],
     ["en", "Ahem."], ["en", "ahem"], ["en", "A hem"], ["en", "Aham"], ["en", "Hck Hck"], ["en", "HCKHCK"], ["en", "Hmm."], ["en", "Hmmmm"], ["en", "hmph"], ["en", "tsk"], ["en", "phew"], ["en", "Ah."],
     ["es", "jajaja"], ["es", "jeje, sí"], ["es", "ejem"], ["fr", "hihi"], ["fr", "héhé"], ["de", "ähem"], ["de", "hehe, ja"], ["it", "ahahah"], ["it", "ehm"], ["pt", "kkkkk"], ["pt", "rsrsrs"], ["pt", "hahaha"],
-    ["hi", "हाहाहा"], ["hi", "haha"], ["zh", "哈哈哈"], ["zh", "呵呵，好的"], ["zh", "咳咳"], ["ja", "ははは"], ["ja", "あはは、なるほど"], ["ja", "ふふふ"], ["ja", "えへへ"], ["ko", "하하하"], ["ko", "ㅋㅋㅋ"], ["ko", "에헴"], ["ko", "크흠"],
+    ["hi", "हाहाहा"], ["hi", "haha"], ["zh", "哈哈哈"], ["zh", "呵呵，好的"], ["zh", "咳咳"], ["ja", "ははは"], ["ja", "あはは、なるほど"], ["ja", "ふふふ"], ["ja", "えへへ"], ["ko", "하하하"], ["ko", "ㅋㅋㅋ"], ["ko", "에헴"], ["ko", "크흠"], ["ru", "хахаха"],
   ];
   for (const [lang, t] of yes) assert.equal(isBackchannel(t, lang as never), true, `${lang}: ${t}`);
   const no: [string, string][] = [
     ["en", "ugh wait stop"], ["en", "haha no"], ["en", "stop"], ["en", "wait"], ["en", "no"], ["en", "hey"], ["en", "hi"], ["en", "he"], ["en", "hack"], ["en", "hand"], ["en", "A ham"], ["en", "ahem, what about the tests"],
-    ["es", "hija"], ["es", "jaja espera"], ["pt", "kkk para"], ["de", "haha, halt"], ["zh", "哈哈等一下"], ["ja", "ははは、ちょっと待って"], ["ko", "하하 잠깐만요"], ["hi", "हाहा रुको"],
+    ["es", "hija"], ["es", "jaja espera"], ["pt", "kkk para"], ["de", "haha, halt"], ["zh", "哈哈等一下"], ["ja", "ははは、ちょっと待って"], ["ko", "하하 잠깐만요"], ["hi", "हाहा रुको"], ["ru", "хаха подожди"],
   ];
   for (const [lang, t] of no) assert.equal(isBackchannel(t, lang as never), false, `${lang}: ${t}`);
 });

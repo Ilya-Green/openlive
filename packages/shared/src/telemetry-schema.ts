@@ -31,7 +31,7 @@ const PROVIDER_IDS = [
 ] as const;
 const AGENT_IDS = ["claude-code", "codex", "cursor", "opencode", "hermes", "gemini", "copilot", "kiro", "pi"] as const;
 const BRAIN_IDS = [...PROVIDER_IDS, ...AGENT_IDS] as const;
-const LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko"] as const;
+const LANGUAGES = ["en", "es", "fr", "de", "it", "pt", "hi", "zh", "ja", "ko", "ru"] as const;
 const STT_FAMILIES = ["whisper", "nemotron", "nemotron-3.5", "parakeet", "moonshine", "canary"] as const;
 const TTS_FAMILIES = ["kokoro", "supertonic", "clone", "pocket", "kitten", "piper", "kokoro-native", "matcha"] as const;
 const ENGINE_FAMILIES = [

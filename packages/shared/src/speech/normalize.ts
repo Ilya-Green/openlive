@@ -17,6 +17,7 @@ import * as hi from "n2words/hi";
 import * as zh from "n2words/zh-Hans-CN";
 import * as ja from "n2words/ja";
 import * as ko from "n2words/ko";
+import * as ru from "n2words/ru";
 import type { Lexicon } from "./lexicon";
 
 // pt-BR and zh type their currency option as their own codes; money() checks
@@ -110,6 +111,15 @@ add({
   number: (n) => `${n}번`, percent: (n) => `${n} 퍼센트`,
   time(h, m) { return `${h >= 1 && h <= 12 ? koNative(h) : card(this, String(h))} 시${m ? ` ${card(this, String(m))} 분` : ""}`; },
 });
+add({
+  code: "ru", locale: "ru", n: ru, one: "один", point: "запятая", vsep: "точка", dot: "точка", at: "собака", and: "и", plus: "плюс", minus: "минус",
+  times: "умножить на", by: "на", fold: "раз", equals: "равно", to: "до", about: "около", version: "версия", dash: "тире", more: "больше", less: "меньше",
+  number: (n) => `номер ${n}`, percent: (n) => `${n} процентов`,
+  time(h, m) {
+    const hour = h === 1 ? "час" : h >= 2 && h <= 4 ? "часа" : "часов";
+    return m ? `${card(this, String(h))} ${hour} ${card(this, String(m))}` : `${card(this, String(h))} ${hour}`;
+  },
+});
 const DECIMAL = new Map(Object.values(LANGS).map((l) => [l.code, new Intl.NumberFormat(l.locale).formatToParts(1.5).find((p) => p.type === "decimal")!.value]));
 
 /** A non-negative integer as words (n2words). */
@@ -201,8 +211,8 @@ function around(L: Lang, value: number, said: string, opts: Intl.NumberFormatOpt
 const counted = (L: Lang, n: Num) => (n.int === "1" && !n.frac && L.one ? L.one : words(L, n.int, n.frac, n.grouped));
 
 // ── money ────────────────────────────────────────────────────────────────
-const SYMBOLS: Record<string, string> = { "$": "USD", "US$": "USD", "C$": "CAD", "A$": "AUD", "R$": "BRL", "€": "EUR", "£": "GBP", "¥": "JPY", "₹": "INR", "₩": "KRW" };
-const CODES = "USD|EUR|GBP|JPY|CNY|RMB|INR|KRW|CAD|AUD|BRL|MXN|CHF";
+const SYMBOLS: Record<string, string> = { "$": "USD", "US$": "USD", "C$": "CAD", "A$": "AUD", "R$": "BRL", "€": "EUR", "£": "GBP", "¥": "JPY", "₹": "INR", "₩": "KRW", "₽": "RUB" };
+const CODES = "USD|EUR|GBP|JPY|CNY|RMB|INR|KRW|CAD|AUD|BRL|MXN|CHF|RUB";
 // English names: [one, many, minor one, minor many]; a currency without minor
 // units reads its fraction as a decimal.
 const EN_MONEY: Record<string, string[]> = {
@@ -211,6 +221,24 @@ const EN_MONEY: Record<string, string[]> = {
   INR: ["rupee", "rupees", "paisa", "paise"], BRL: ["real", "reais", "centavo", "centavos"], MXN: ["peso", "pesos", "centavo", "centavos"],
   CHF: ["franc", "francs", "centime", "centimes"], JPY: ["yen", "yen"], CNY: ["yuan", "yuan"], KRW: ["won", "won"],
 };
+// Russian names: [one, 2-4, 5+, minor one, minor 2-4, minor 5+]; a currency that
+// does not decline (евро) repeats its form. The minor unit is spelled with cents,
+// "12,50 €" → "двенадцать евро пятьдесят центов".
+const RU_MONEY: Record<string, string[]> = {
+  RUB: ["рубль", "рубля", "рублей", "копейка", "копейки", "копеек"],
+  EUR: ["евро", "евро", "евро", "цент", "цента", "центов"],
+  USD: ["доллар", "доллара", "долларов", "цент", "цента", "центов"],
+  GBP: ["фунт", "фунта", "фунтов", "пенни", "пенни", "пенни"],
+  JPY: ["иена", "иены", "иен"], CNY: ["юань", "юаня", "юаней"], KRW: ["вон", "вона", "вон"],
+  CAD: ["канадский доллар", "канадских доллара", "канадских долларов", "цент", "цента", "центов"],
+  AUD: ["австралийский доллар", "австралийских доллара", "австралийских долларов", "цент", "цента", "центов"],
+  INR: ["рупия", "рупии", "рупий", "пайса", "пайсы", "пайс"],
+  BRL: ["реал", "реала", "реалов", "сентаво", "сентаво", "сентаво"],
+  MXN: ["песо", "песо", "песо", "сентаво", "сентаво", "сентаво"],
+  CHF: ["франк", "франка", "франков", "сантим", "сантима", "сантимов"],
+};
+const ruPlural = (one: string | undefined, two: string | undefined, five: string | undefined, n: number) =>
+  n % 10 === 1 && n % 100 !== 11 ? one ?? "" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? two ?? "" : five ?? "";
 function money(L: Lang, n: Num, code: string): string {
   if (code === "RMB") code = "CNY";
   if (n.frac?.length === 1) n = { ...n, frac: `${n.frac}0` }; // $1.5 is a dollar fifty
@@ -222,6 +250,13 @@ function money(L: Lang, n: Num, code: string): string {
     if (!cents || !minorOne) return `${words(L, n.int, n.frac, n.grouped)} ${many}`;
     const minor = `${card(L, n.frac)} ${n.frac === "01" ? minorOne : minorMany}`;
     return /^0+$/.test(n.int) ? minor : `${major} and ${minor}`;
+  }
+  if (L.code === "ru" && RU_MONEY[code]) {
+    const [one, two, five, minorOne, minorTwo, minorFive] = RU_MONEY[code]!;
+    const major = `${words(L, n.int, undefined, n.grouped)} ${ruPlural(one, two, five, +n.int)}`;
+    if (n.frac === undefined || /^0+$/.test(n.frac)) return major;
+    const minor = `${card(L, n.frac)} ${ruPlural(minorOne ?? one, minorTwo ?? two, minorFive ?? five, +n.frac)}`;
+    return /^0+$/.test(n.int) ? minor : `${major} ${minor}`;
   }
   if (L.n.currencyValues?.currency.includes(code) && (n.frac === undefined || cents) && n.int.length <= 15) {
     const s = L.n.toCurrency(n.frac ? `${n.int}.${n.frac}` : n.int, { ...L.opts, currency: code });
@@ -241,6 +276,8 @@ const INTL_UNITS: Record<string, string> = {
   "°": "degree", "km/h": "kilometer-per-hour", kph: "kilometer-per-hour", mph: "mile-per-hour", ms: "millisecond", sec: "second", secs: "second",
   min: "minute", mins: "minute", h: "hour", hr: "hour", hrs: "hour", KB: "kilobyte", kB: "kilobyte", MB: "megabyte", GB: "gigabyte", TB: "terabyte",
   PB: "petabyte", Mb: "megabit", Gb: "gigabit", Mbps: "megabit-per-second", Gbps: "gigabit-per-second",
+  // Russian abbreviations for the metric units Intl already knows by name.
+  км: "kilometer", м: "meter", см: "centimeter", мм: "millimeter", кг: "kilogram", г: "gram",
 };
 const EN_UNITS: Record<string, [string, string]> = {
   mg: ["milligram", "milligrams"], GHz: ["gigahertz", "gigahertz"], MHz: ["megahertz", "megahertz"], kHz: ["kilohertz", "kilohertz"], Hz: ["hertz", "hertz"],
@@ -264,8 +301,8 @@ function date(L: Lang, y: number, m: number, d: number): string | null {
   if (m < 1 || m > 12 || new Date(t).getUTCDate() !== d) return null;
   const parts = new Intl.DateTimeFormat(L.locale, { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" }).formatToParts(t);
   return parts.map((p, i) => {
-    if (p.type === "year") return year(L, p.value);
-    if (p.type === "day") return L.code === "en" || L.code === "de" ? ordinal(L, p.value) : L.code === "fr" && d === 1 ? "premier" : card(L, p.value);
+    if (p.type === "year") return L.code === "ru" ? p.value : year(L, p.value);
+    if (p.type === "day") return L.code === "ru" ? p.value : L.code === "en" || L.code === "de" ? ordinal(L, p.value) : L.code === "fr" && d === 1 ? "premier" : card(L, p.value);
     if (p.type === "month" && /^\d+$/.test(p.value)) return KO_MONTH[p.value] && L.code === "ko" ? KO_MONTH[p.value]! : card(L, p.value);
     if (p.type === "literal" && L.code === "de" && parts[i - 1]?.type === "day") return p.value.replace(".", "");
     return p.value;
@@ -299,6 +336,7 @@ const ABBREVIATIONS: Record<string, [RegExp, string][]> = {
   de: [[/\bz\.\s?B\./g, "zum Beispiel"], [/\bd\.\s?h\./g, "das heißt"], [/\busw\./g, "und so weiter"], [/\bbzw\./g, "beziehungsweise"], [/\bca\./g, "circa"], [/\bNr\.\s?(?=\d)/g, "Nummer "]],
   it: [[/\becc\./gi, "eccetera"], [/\bn\.\s?(?=\d)/g, "numero "]],
   pt: [[/\betc\./gi, "etcétera"], [/\bn\.?º\s?(?=\d)/gi, "número "], [/\bSr\.(?=\s)/g, "senhor"], [/\bSra\.(?=\s)/g, "senhora"]],
+  ru: [[/(?<!\p{L})т\.\s?е\./gu, "то есть"], [/(?<!\p{L})т\.\s?д\./gu, "так далее"], [/(?<!\p{L})т\.\s?п\./gu, "тому подобное"], [/(?<!\p{L})др\.(?=\s)/gu, "другие"]],
 };
 const EN_FRACTIONS: Record<string, string> = { "1/2": "one half", "1/3": "one third", "2/3": "two thirds", "1/4": "one quarter", "3/4": "three quarters", "½": "one half", "⅓": "one third", "⅔": "two thirds", "¼": "one quarter", "¾": "three quarters" };
 
@@ -385,10 +423,17 @@ export function normalizeAligned(text: string, langCode: string, lexicon?: Lexic
   for (const [re, said] of ABBREVIATIONS[L.code] ?? []) r(re, () => said);
 
   // Dates and times, before their digits read as anything else.
-  r(/\b(\d{4})-(\d{2})-(\d{2})(?:T(?=\d{2}:))?/g, (m, y, mo, d) => date(L, +y, +mo, +d) ?? m);
+  const dated = (m: string, y: string, mo: string, d: string) => {
+    const said = date(L, +y, +mo, +d);
+    if (said === null) return m;
+    // Languages that keep day/year as digits must hold the date out of the
+    // number and unit passes, or "25", "2026", "г." get respelled.
+    return L.code === "ru" ? hold(said, m) : said;
+  };
+  r(/\b(\d{4})-(\d{2})-(\d{2})(?:T(?=\d{2}:))?/g, (m, y, mo, d) => dated(m, y, mo, d));
   r(/\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b/g, (m, a, b, y) => {
     const monthFirst = L.code === "en" ? +a <= 12 : +b > 12;
-    return date(L, +y, monthFirst ? +a : +b, monthFirst ? +b : +a) ?? m;
+    return dated(m, y, monthFirst ? a : b, monthFirst ? b : a);
   });
   if (L.code === "en") {
     r(new RegExp(String.raw`\b${EN_MONTH}\s(\d{1,2})(?:st|nd|rd|th)?\b(?:,?\s(\d{4})\b)?`, "g"), (m, mon, d, y) => {
@@ -437,7 +482,7 @@ export function normalizeAligned(text: string, langCode: string, lexicon?: Lexic
 
   // Money, percentages, measures.
   const moneyScale = String.raw`(?:\s?(k|K|M|mn|B|bn|T)\b|\s(thousand|million|billion|trillion)\b)?`;
-  r(new RegExp(String.raw`(US\$|C\$|A\$|R\$|[$€£¥₹₩])\s?(${NUM})${moneyScale}`, "g"), (_, sym, v, k, word) => {
+  r(new RegExp(String.raw`(US\$|C\$|A\$|R\$|[$€£¥₹₩₽])\s?(${NUM})${moneyScale}`, "g"), (_, sym, v, k, word) => {
     const code = sym === "¥" && L.code === "zh" ? "CNY" : SYMBOLS[sym]!;
     if (word) return `${n(v)} ${word} ${EN_MONEY[code]?.[1] ?? code}`; // English text: "$2 million"
     return money(L, k ? shift(num(v), SCALE[k.replace(/^K$/, "k")]!) : num(v), code);

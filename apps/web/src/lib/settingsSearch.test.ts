@@ -24,7 +24,7 @@ describe("settings search", () => {
   });
 
   it("finds the language picker by any curated language, in English or its own name", () => {
-    for (const q of ["language", "spanish", "español", "espanol", "japanese", "日本語", "한국어", "हिन्दी", "chinese", "中文", "français", "deutsch"]) {
+    for (const q of ["language", "spanish", "español", "espanol", "japanese", "日本語", "한국어", "हिन्दी", "chinese", "中文", "français", "deutsch", "russian", "русский"]) {
       expect(find(q)).toContain("Language");
     }
   });
